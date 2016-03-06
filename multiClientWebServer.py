@@ -10,6 +10,33 @@ import base64
 all_connections = []
 all_addresses = []
 
+# -----------------CREATE SOCKET----------------- #
+
+def socket_create():
+    try:
+        global host
+        global port
+        global s
+        host = ''
+        port = 8910
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    except socket.error as msg:
+        print("Socket creation error " + str(msg))
+
+# -----------------BIND SOCKET----------------- #
+
+def socket_bind():
+    try:
+        global host
+        global port
+        global s
+        print("Binding socket to port " + str(port))
+        s.bind((host, port)) # tuple
+        s.listen(5)
+    except socket.error as msg:
+        print("Socket binding error " + str(msg) + "\n" + "Retrying...")
+        socket_bind()
+
 # -----------------THREAD FOR LISTENING TO INCOMING DATA----------------- #
 
 class startThreadClass(threading.Thread):
@@ -31,33 +58,6 @@ class startHandshakeThread(threading.Thread):
         handshake_resp = create_handshake_resp(self.handshake)
         self.conn.send(str.encode(handshake_resp, 'utf-8'))
         print("handshake sent to client")
-
-# -----------------CREATE SOCKET----------------- #
-
-def socket_create():
-    try:
-        global host
-        global port
-        global s
-        host = ''
-        port = 8765
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    except socket.error as msg:
-        print("Socket creation error " + str(msg))
-
-# -----------------BIND SOCKET----------------- #
-
-def socket_bind():
-    try:
-        global host
-        global port
-        global s
-        print("Binding socket to port " + str(port))
-        s.bind((host, port)) # tuple
-        s.listen(5)
-    except socket.error as msg:
-        print("Socket binding error " + str(msg) + "\n" + "Retrying...")
-        socket_bind()
 
 # -----------------ACCEPT CONNECTIONS FROM MULTIPLE CLIENTS----------------- #
 
@@ -104,7 +104,7 @@ def listening_for_msgs(conn):
             rcv_msg = conn.recv(1024)
             rcv_msg_str = str(rcv_msg[:].decode("utf-8"))
             rcv_msg_list = rcv_msg_str.split('\r\n')
-            if rcv_msg_list[0] == 'GET /echo HTTP/1.1':
+            if rcv_msg_list[0] == 'GET / HTTP/1.1':
                 HandshakeThread = startHandshakeThread(rcv_msg_str, conn)
                 HandshakeThread.start()
             else:
