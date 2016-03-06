@@ -1,0 +1,40 @@
+<!DOCTYPE HTML>
+<html>
+   <head>
+
+      <script type="text/javascript">
+
+         function testResults(form) {
+           if ("WebSocket" in window)
+           { var ws = new WebSocket("ws://192.168.2.233:8998");
+             ws.onopen = function ()
+           {
+             alert("Connection with server open.");
+             var TestVar = form.inputbox.value;
+             ws.send(TestVar)
+             alert("Message is sent...");
+           }
+           }
+           else
+           {
+              // The browser doesn't support WebSocket
+              alert("WebSocket NOT supported by your Browser!");
+           }
+         }
+
+      </script>
+
+   </head>
+   <body>
+
+         <form name="myform" action="" method="GET">Enter something in the box: <BR>
+             <input type="text" name="inputbox" value=""><P>
+             <input type="button" name="button" value="Click" onClick="testResults(this.form)">
+         </form>
+
+      <div id="sse">
+         <a href="javascript:WebSocketTest()">Run WebSocket</a>
+      </div>
+
+   </body>
+</html>
