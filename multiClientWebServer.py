@@ -116,33 +116,36 @@ def listening_for_msgs(conn):
 # -----------------UNMASKING CLIENTS PACKET FUNCTION----------------- #
 
 def unmask_data(rcv_msg):
+    try:
         # as a simple server, we expect to receive:
         #    - all data at one go and one frame
         #    - one frame at a time
         #    - text protocol
         #    - no ping pong messages
-    data = bytearray(rcv_msg)
-    if len(data) < 6:
-        raise Exception("Error reading data")
-    # FIN bit must be set to indicate end of frame
-    assert(0x1 == (0xFF & data[0]) >> 7)
-    # data must be a text frame
-    # 0x8 (close connection) is handled with assertion failure
-    assert(0x1 == (0xF & data[0]))
+        data = bytearray(rcv_msg)
+        if len(data) < 6:
+            raise Exception("Error reading data")
+        # FIN bit must be set to indicate end of frame
+        assert (0x1 == (0xFF & data[0]) >> 7)
+        # data must be a text frame
+        # 0x8 (close connection) is handled with assertion failure
+        assert (0x1 == (0xF & data[0]))
 
-    # assert that data is masked
-    assert(0x1 == (0xFF & data[1]) >> 7)
-    datalen = (0x7F & data[1])
+        # assert that data is masked
+        assert (0x1 == (0xFF & data[1]) >> 7)
+        datalen = (0x7F & data[1])
 
-    # print("received data len %d" %(datalen,))
+        # print("received data len %d" %(datalen,))
 
-    str_data = ''
-    if datalen > 0:
-        mask_key = data[2:6]
-        masked_data = data[6:(6 + datalen)]
-        unmasked_data = [masked_data[i] ^ mask_key[i % 4] for i in range(len(masked_data))]
-        str_data = str(bytearray(unmasked_data).decode("utf-8"))
-    return str_data
+        str_data = ''
+        if datalen > 0:
+            mask_key = data[2:6]
+            masked_data = data[6:(6 + datalen)]
+            unmasked_data = [masked_data[i] ^ mask_key[i % 4] for i in range(len(masked_data))]
+            str_data = str(bytearray(unmasked_data).decode("utf-8"))
+        return str_data
+    except AssertionError:
+        pass
 
 # -----------------HANDSHAKE RESPONSE FUNCTION----------------- #
 
